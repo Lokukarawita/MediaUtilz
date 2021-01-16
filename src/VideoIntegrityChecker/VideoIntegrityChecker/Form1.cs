@@ -76,6 +76,9 @@ namespace Video_Integrity_Checker
                     {
                         timer.Stop();
                         lblActivity.Text = "Idle";
+                        logWriter.Close();
+                        logWriter.Dispose();
+                        logWriter = null;
                     }
                 }
                 else
