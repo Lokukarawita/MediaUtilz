@@ -8,6 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using Video_Integrity_Checker.Ops;
 
 namespace Video_Integrity_Checker
 {
@@ -19,7 +20,11 @@ namespace Video_Integrity_Checker
         private bool endOfFileEnum = false;
         private StreamWriter logWriter;
 
-        private int total = 0, okno = 0;
+        private bool isCountingFiles = false;
+        private int processedTotal = 0, okno = 0, foundTotal;
+        private DateTime processStartedOn;
+        private System.Threading.CancellationTokenSource cancellationTokenSource;
+        private System.Threading.CancellationToken cancellationToken;
 
         public Form1()
         {
@@ -37,78 +42,7 @@ namespace Video_Integrity_Checker
 
         }
 
-        private void Timer_Tick(object sender, EventArgs e)
-        {
 
-            if (fileEnumarator != null)
-            {
-                var idle = agents.Where(x => !x.IsActive).ToList();
-                idle.ForEach(x =>
-                {
-                    if (x.NonFormat.HasValue && x.NonFormat.Value)
-                    {
-                        total += 1;
-                        //logWriter.WriteLine("")
-                    }
-                    else if (x.OK.HasValue && x.OK.Value)
-                    {
-                        total += 1;
-                        okno += 1;
-                        logWriter.WriteLine($"OK,\"{x.Input.Path}\",\"{x.Input.MoveOkPath ?? string.Empty}\"");
-                    }
-                    else if (x.OK.HasValue && !x.OK.Value)
-                    {
-                        total += 1;
-                        logWriter.WriteLine($"FAIL,\"{x.Input.Path}\",\"{string.Empty}\"");
-                    }
-
-                    x.OK = null;
-                    x.NonFormat = null;
-
-                });
-
-                lblOkFiles.Text = okno.ToString();
-                lblTotal.Text = total.ToString();
-
-                if (endOfFileEnum)
-                {
-                    if(idle.Count == agents.Count)
-                    {
-                        timer.Stop();
-                        lblActivity.Text = "Idle";
-                        logWriter.Close();
-                        logWriter.Dispose();
-                        logWriter = null;
-                    }
-                }
-                else
-                {
-                    lblActivity.Text = $"Active {DateTime.Now}";
-                }
-
-
-                for (int i = 0; i < idle.Count; i++)
-                {
-                    if(fileEnumarator.MoveNext())
-                    {
-                        idle[i].Begin(new Ops.AgentInput()
-                        {
-                            FFMPEG = txtFF.Text,
-                            Formats = txtFileTypes.Text.Split(','),
-                            MoveOk = chkMoveOkFiles.Checked,
-                            MoveOkPath = txtOkFilesMove.Text,
-                            Path = fileEnumarator.Current,
-                            SrcPath = txtSrc.Text
-                        });
-                    }
-                    else
-                    {
-                        endOfFileEnum = true;
-                        break;
-                    }
-                }
-            }
-        }
 
 
         private void Form1_Load(object sender, EventArgs e)
@@ -202,10 +136,161 @@ namespace Video_Integrity_Checker
 
             var direnumerator = Directory.EnumerateFiles(txtSrc.Text, "*.*", SearchOption.AllDirectories);
             fileEnumarator = direnumerator.GetEnumerator();
-            total = 0;
+            processedTotal = 0;
             okno = 0;
             endOfFileEnum = false;
+
+            lblETA.Text = "";
+            processStartedOn = DateTime.Now;
+            btnCancel.Enabled = true;
+            cancellationTokenSource = new System.Threading.CancellationTokenSource();
+            cancellationToken = cancellationTokenSource.Token;
+
+            CountFiles();
             timer.Start();
+        }
+
+        private void btnCancel_Click(object sender, EventArgs e)
+        {
+            cancellationTokenSource.Cancel();
+            btnCancel.Enabled = false;
+        }
+
+        private void CountFiles()
+        {
+            isCountingFiles = true;
+            foundTotal = 0;
+
+            var src = txtSrc.Text;
+            var formats = txtFileTypes.Text.Split(',');
+
+            Task.Factory.StartNew(() =>
+            {
+                foreach (var item in Directory.EnumerateFiles(src, "*.*", SearchOption.AllDirectories))
+                {
+                    var validFormat = item?.IsValidFormat(formats) ?? false;
+                    if (validFormat)
+                    {
+                        System.Threading.Interlocked.Increment(ref foundTotal);
+                    }
+
+                }
+            }, cancellationToken)
+                .ContinueWith((ob) =>
+                {
+                    isCountingFiles = false;
+                });
+        }
+
+        private void Timer_Tick(object sender, EventArgs e)
+        {
+            var foundLocal = System.Threading.Thread.VolatileRead(ref foundTotal);
+            lblTotalFound.Text = foundLocal.ToString();
+
+            if (isCountingFiles)
+            {
+                lblActivity.Text = $"Searching... {DateTime.Now}";
+                return;
+            }
+            else
+            {
+                var elapsedTimeTS = (DateTime.Now - processStartedOn);
+                var elapsedTime = elapsedTimeTS.TotalSeconds;
+                var remainingitems = foundTotal - processedTotal;
+                var perItemTime = processedTotal / elapsedTime;
+                var totalItemWillTake = foundTotal * perItemTime;
+                var totalItemWillTakeTS = TimeSpan.FromSeconds(totalItemWillTake);
+                var eta = totalItemWillTakeTS - elapsedTimeTS;
+
+                //var remainingTime = remainingitems * perItemTime;
+                //var remainingTimeTs = TimeSpan.FromSeconds(remainingTime);
+                lblETA.Text = $"{elapsedTimeTS:hh\\:mm\\:s} / {totalItemWillTakeTS:hh\\:mm\\:s} ({eta:hh\\:mm\\:s})";
+            }
+            
+            if (fileEnumarator != null)
+            {
+                var idle = agents.Where(x => !x.IsActive).ToList();
+
+                // stats
+                idle.ForEach(x =>
+                {
+                    if (x.NonFormat.HasValue && x.NonFormat.Value)
+                    {
+                        //processedTotal += 1;
+                        //logWriter.WriteLine("")
+                    }
+                    else if (x.OK.HasValue && x.OK.Value)
+                    {
+                        processedTotal += 1;
+                        okno += 1;
+                        logWriter.WriteLine($"OK,\"{x.Input.Path}\",\"{x.NewPath ?? string.Empty}\"");
+                    }
+                    else if (x.OK.HasValue && !x.OK.Value)
+                    {
+                        processedTotal += 1;
+                        logWriter.WriteLine($"FAIL,\"{x.Input.Path}\",\"{string.Empty}\"");
+                    }
+
+                    x.OK = null;
+                    x.NonFormat = null;
+
+                });
+
+                //show stats
+                lblOkFiles.Text = okno.ToString();
+                lblTotal.Text = processedTotal.ToString();
+
+                if (cancellationToken.IsCancellationRequested || endOfFileEnum)
+                {
+                    //check end of activity
+                    if (idle.Count == agents.Count)
+                    {
+                        btnCancel.Enabled = false;
+                        timer.Stop();
+                        lblActivity.Text = "Idle";
+                        logWriter.Close();
+                        logWriter.Dispose();
+                        logWriter = null;
+                    }
+                    else if (cancellationToken.IsCancellationRequested)
+                    {
+                        lblActivity.Text = $"Active {DateTime.Now}... Cancel Pending!";
+                    }
+                    else if (endOfFileEnum)
+                    {
+                        lblActivity.Text = $"Active {DateTime.Now}... Last files!";
+                    }
+                }
+                else
+                {
+                    lblActivity.Text = $"Active {DateTime.Now}";
+                }
+
+                //start new work only if not cancelled
+                if (!cancellationToken.IsCancellationRequested)
+                {
+                    for (int i = 0; i < idle.Count; i++)
+                    {
+                        if (fileEnumarator.MoveNext())
+                        {
+                            idle[i].Begin(new Ops.AgentInput()
+                            {
+                                FFMPEG = txtFF.Text,
+                                Formats = txtFileTypes.Text.Split(','),
+                                MoveOk = chkMoveOkFiles.Checked,
+                                MoveOkPath = txtOkFilesMove.Text,
+                                Path = fileEnumarator.Current,
+                                SrcPath = txtSrc.Text
+                            });
+                        }
+                        else
+                        {
+                            endOfFileEnum = true;
+                            break;
+                        }
+                    }
+                }
+            }
         }
     }
 }

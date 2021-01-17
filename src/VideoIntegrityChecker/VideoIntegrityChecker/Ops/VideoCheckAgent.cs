@@ -17,9 +17,10 @@ namespace Video_Integrity_Checker.Ops
             {
                 Debug.WriteLine(Input.Path);
 
-                var ext = Path.GetExtension(Input.Path).Trim('.').ToLower();
-                var fmts = Input.Formats ?? new string[0];
-                if (ext == "" || Array.IndexOf(fmts, ext) > -1)
+                //var ext = Path.GetExtension(Input.Path).Trim('.').ToLower();
+                //var fmts = Input.Formats ?? new string[0];
+                var validFormat = Input?.Path.IsValidFormat(Input?.Formats) ?? false;
+                if (validFormat)
                 {
                     NonFormat = false;
                     //var log = Input.Path + ".log";
@@ -105,7 +106,13 @@ namespace Video_Integrity_Checker.Ops
         }
 
 
-
+        private void FakeProcess()
+        {
+            System.Threading.Thread.Sleep(5000);
+            IsActive = false;
+            OK = true;
+            NonFormat = false;
+        }
 
         public void Begin(AgentInput agentInput)
         {
@@ -114,6 +121,9 @@ namespace Video_Integrity_Checker.Ops
             OK = null;
             NonFormat = null;
             Task.Factory.StartNew(() => { DoWork(); });
+            //Task.Factory.StartNew(() => {
+            //    FakeProcess();
+            //});
         }
 
         public bool IsActive { get; private set; }

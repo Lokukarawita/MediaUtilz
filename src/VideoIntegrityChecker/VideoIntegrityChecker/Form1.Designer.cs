@@ -49,7 +49,14 @@ namespace Video_Integrity_Checker
             this.label7 = new System.Windows.Forms.Label();
             this.label5 = new System.Windows.Forms.Label();
             this.nudThreads = new System.Windows.Forms.NumericUpDown();
+            this.lblTotalFound = new System.Windows.Forms.Label();
+            this.label9 = new System.Windows.Forms.Label();
+            this.flowLayoutPanel1 = new System.Windows.Forms.FlowLayoutPanel();
+            this.btnCancel = new System.Windows.Forms.Button();
+            this.lblETA = new System.Windows.Forms.Label();
+            this.label10 = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.nudThreads)).BeginInit();
+            this.flowLayoutPanel1.SuspendLayout();
             this.SuspendLayout();
             // 
             // label1
@@ -157,9 +164,9 @@ namespace Video_Integrity_Checker
             // 
             // btnStart
             // 
-            this.btnStart.Location = new System.Drawing.Point(451, 260);
+            this.btnStart.Location = new System.Drawing.Point(442, 296);
             this.btnStart.Name = "btnStart";
-            this.btnStart.Size = new System.Drawing.Size(94, 62);
+            this.btnStart.Size = new System.Drawing.Size(87, 55);
             this.btnStart.TabIndex = 11;
             this.btnStart.Text = "Start";
             this.btnStart.UseVisualStyleBackColor = true;
@@ -168,7 +175,7 @@ namespace Video_Integrity_Checker
             // label4
             // 
             this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(99, 260);
+            this.label4.Location = new System.Drawing.Point(99, 257);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(41, 13);
             this.label4.TabIndex = 12;
@@ -177,7 +184,7 @@ namespace Video_Integrity_Checker
             // lblActivity
             // 
             this.lblActivity.AutoSize = true;
-            this.lblActivity.Location = new System.Drawing.Point(156, 260);
+            this.lblActivity.Location = new System.Drawing.Point(156, 257);
             this.lblActivity.Name = "lblActivity";
             this.lblActivity.Size = new System.Drawing.Size(24, 13);
             this.lblActivity.TabIndex = 13;
@@ -186,7 +193,7 @@ namespace Video_Integrity_Checker
             // label6
             // 
             this.label6.AutoSize = true;
-            this.label6.Location = new System.Drawing.Point(95, 282);
+            this.label6.Location = new System.Drawing.Point(94, 300);
             this.label6.Name = "label6";
             this.label6.Size = new System.Drawing.Size(45, 13);
             this.label6.TabIndex = 14;
@@ -195,7 +202,7 @@ namespace Video_Integrity_Checker
             // lblOkFiles
             // 
             this.lblOkFiles.AutoSize = true;
-            this.lblOkFiles.Location = new System.Drawing.Point(156, 282);
+            this.lblOkFiles.Location = new System.Drawing.Point(155, 300);
             this.lblOkFiles.Name = "lblOkFiles";
             this.lblOkFiles.Size = new System.Drawing.Size(13, 13);
             this.lblOkFiles.TabIndex = 15;
@@ -204,7 +211,7 @@ namespace Video_Integrity_Checker
             // lblTotal
             // 
             this.lblTotal.AutoSize = true;
-            this.lblTotal.Location = new System.Drawing.Point(156, 305);
+            this.lblTotal.Location = new System.Drawing.Point(3, 0);
             this.lblTotal.Name = "lblTotal";
             this.lblTotal.Size = new System.Drawing.Size(13, 13);
             this.lblTotal.TabIndex = 17;
@@ -213,7 +220,7 @@ namespace Video_Integrity_Checker
             // label7
             // 
             this.label7.AutoSize = true;
-            this.label7.Location = new System.Drawing.Point(85, 305);
+            this.label7.Location = new System.Drawing.Point(84, 323);
             this.label7.Name = "label7";
             this.label7.Size = new System.Drawing.Size(55, 13);
             this.label7.TabIndex = 16;
@@ -222,7 +229,7 @@ namespace Video_Integrity_Checker
             // label5
             // 
             this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(334, 260);
+            this.label5.Location = new System.Drawing.Point(439, 254);
             this.label5.Name = "label5";
             this.label5.Size = new System.Drawing.Size(46, 13);
             this.label5.TabIndex = 18;
@@ -230,7 +237,7 @@ namespace Video_Integrity_Checker
             // 
             // nudThreads
             // 
-            this.nudThreads.Location = new System.Drawing.Point(337, 283);
+            this.nudThreads.Location = new System.Drawing.Point(442, 270);
             this.nudThreads.Minimum = new decimal(new int[] {
             1,
             0,
@@ -245,14 +252,74 @@ namespace Video_Integrity_Checker
             0,
             0});
             // 
+            // lblTotalFound
+            // 
+            this.lblTotalFound.AutoSize = true;
+            this.lblTotalFound.Location = new System.Drawing.Point(40, 0);
+            this.lblTotalFound.Name = "lblTotalFound";
+            this.lblTotalFound.Size = new System.Drawing.Size(13, 13);
+            this.lblTotalFound.TabIndex = 20;
+            this.lblTotalFound.Text = "0";
+            // 
+            // label9
+            // 
+            this.label9.AutoSize = true;
+            this.label9.Location = new System.Drawing.Point(22, 0);
+            this.label9.Name = "label9";
+            this.label9.Size = new System.Drawing.Size(12, 13);
+            this.label9.TabIndex = 21;
+            this.label9.Text = "/";
+            // 
+            // flowLayoutPanel1
+            // 
+            this.flowLayoutPanel1.Controls.Add(this.lblTotal);
+            this.flowLayoutPanel1.Controls.Add(this.label9);
+            this.flowLayoutPanel1.Controls.Add(this.lblTotalFound);
+            this.flowLayoutPanel1.Controls.Add(this.btnCancel);
+            this.flowLayoutPanel1.Location = new System.Drawing.Point(152, 325);
+            this.flowLayoutPanel1.Name = "flowLayoutPanel1";
+            this.flowLayoutPanel1.Size = new System.Drawing.Size(173, 25);
+            this.flowLayoutPanel1.TabIndex = 22;
+            // 
+            // btnCancel
+            // 
+            this.btnCancel.Enabled = false;
+            this.btnCancel.Location = new System.Drawing.Point(56, 0);
+            this.btnCancel.Margin = new System.Windows.Forms.Padding(0);
+            this.btnCancel.Name = "btnCancel";
+            this.btnCancel.Size = new System.Drawing.Size(75, 23);
+            this.btnCancel.TabIndex = 22;
+            this.btnCancel.Text = "Cancel";
+            this.btnCancel.UseVisualStyleBackColor = true;
+            this.btnCancel.Click += new System.EventHandler(this.btnCancel_Click);
+            // 
+            // lblETA
+            // 
+            this.lblETA.AutoSize = true;
+            this.lblETA.Location = new System.Drawing.Point(156, 277);
+            this.lblETA.Name = "lblETA";
+            this.lblETA.Size = new System.Drawing.Size(0, 13);
+            this.lblETA.TabIndex = 24;
+            // 
+            // label10
+            // 
+            this.label10.AutoSize = true;
+            this.label10.Location = new System.Drawing.Point(99, 277);
+            this.label10.Name = "label10";
+            this.label10.Size = new System.Drawing.Size(28, 13);
+            this.label10.TabIndex = 23;
+            this.label10.Text = "ETA";
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(570, 344);
+            this.ClientSize = new System.Drawing.Size(570, 363);
+            this.Controls.Add(this.lblETA);
+            this.Controls.Add(this.label10);
+            this.Controls.Add(this.flowLayoutPanel1);
             this.Controls.Add(this.nudThreads);
             this.Controls.Add(this.label5);
-            this.Controls.Add(this.lblTotal);
             this.Controls.Add(this.label7);
             this.Controls.Add(this.lblOkFiles);
             this.Controls.Add(this.label6);
@@ -278,6 +345,8 @@ namespace Video_Integrity_Checker
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Form1_FormClosing);
             this.Load += new System.EventHandler(this.Form1_Load);
             ((System.ComponentModel.ISupportInitialize)(this.nudThreads)).EndInit();
+            this.flowLayoutPanel1.ResumeLayout(false);
+            this.flowLayoutPanel1.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -305,6 +374,12 @@ namespace Video_Integrity_Checker
         private System.Windows.Forms.Label label7;
         private System.Windows.Forms.Label label5;
         private System.Windows.Forms.NumericUpDown nudThreads;
+        private System.Windows.Forms.Label lblTotalFound;
+        private System.Windows.Forms.Label label9;
+        private System.Windows.Forms.FlowLayoutPanel flowLayoutPanel1;
+        private System.Windows.Forms.Button btnCancel;
+        private System.Windows.Forms.Label lblETA;
+        private System.Windows.Forms.Label label10;
     }
 }
 
